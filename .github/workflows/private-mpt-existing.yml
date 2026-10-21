@@ -1,0 +1,82 @@
+name: Private MPT existing repair qualification
+'on':
+  workflow_dispatch: {}
+  push:
+    branches:
+    - validation-mpt-existing-v3-20261021
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - lane: windows-main
+          os: windows-latest
+        - lane: windows-llm
+          os: windows-latest
+    env:
+      LANE: ${{ matrix.lane }}
+      PYTHONUTF8: '1'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Materialize exact private candidate
+      shell: python
+      run: "import os,json,pathlib,base64,subprocess,hashlib\npayload={'windows-main': {'ref': '90f77011d7e3b46d382e6d0180dabfb6725ffee4',\
+        \ 'files': {}, 'patch': ''}, 'windows-llm': {'ref': '90f77011d7e3b46d382e6d0180dabfb6725ffee4', 'files': {'app/services/llm.py':\
+        \ 'c649bd9753d37e99d49d281adc727de1cf3328751df907ce35cbc0f28c621b23', 'test/services/test_llm.py': '5c397c4379aa27f0a7315bcb50177934de7e7b6b7cef68a54e5e9d8063898aa1'},\
+        \ 'patch': 'ZGlmZiAtLWdpdCBhL2FwcC9zZXJ2aWNlcy9sbG0ucHkgYi9hcHAvc2VydmljZXMvbGxtLnB5CmluZGV4IGRlZWY2MmFkM2UzZDFlYTU1MzNmNDliYmU3NzU4ODliMWJmYmQwM2MuLjQ0YWRmNWM4ZjU3OTkzMDE1ZmEwODYxMDA0YTMwNmZhZjFhMWZmY2UgMTAwNjQ0Ci0tLSBhL2FwcC9zZXJ2aWNlcy9sbG0ucHkKKysrIGIvYXBwL3NlcnZpY2VzL2xsbS5weQpAQCAtNDI0LDcgKzQyNCwxNiBAQCBkZWYgX2dlbmVyYXRlX3Jlc3BvbnNlKAogICAgICAgICAgICAgZnJvbSBnb29nbGUgaW1wb3J0IGdlbmFpCiAgICAgICAgICAgICBmcm9tIGdvb2dsZS5nZW5haSBpbXBvcnQgdHlwZXMKIAotICAgICAgICAgICAgaHR0cF9vcHRpb25zID0gdHlwZXMuSHR0cE9wdGlvbnMoYmFzZV91cmw9YmFzZV91cmwpIGlmIGJhc2VfdXJsIGVsc2UgTm9uZQorICAgICAgICAgICAgaHR0cF9vcHRpb25fdmFsdWVzID0ge30KKyAgICAgICAgICAgIGlmIGJhc2VfdXJsOgorICAgICAgICAgICAgICAgIGh0dHBfb3B0aW9uX3ZhbHVlc1siYmFzZV91cmwiXSA9IGJhc2VfdXJsCisgICAgICAgICAgICBpZiByZXF1ZXN0X3RpbWVvdXQgaXMgbm90IE5vbmU6CisgICAgICAgICAgICAgICAgIyBnb29nbGUtZ2VuYWkg55qEIEh0dHBPcHRpb25zLnRpbWVvdXQg5Lul5q+r56eS5Li65Y2V5L2N77yb5LiN6K6+572u5pe2CisgICAgICAgICAgICAgICAgIyDov57mjqXmtYvor5XkvJrml6DpmZDnrYnlvoXkuI3lj6/ovr7nmoTnq6/ngrnjgIIKKyAgICAgICAgICAgICAgICBodHRwX29wdGlvbl92YWx1ZXNbInRpbWVvdXQiXSA9IGludChyZXF1ZXN0X3RpbWVvdXQgKiAxMDAwKQorICAgICAgICAgICAgaHR0cF9vcHRpb25zID0gKAorICAgICAgICAgICAgICAgIHR5cGVzLkh0dHBPcHRpb25zKCoqaHR0cF9vcHRpb25fdmFsdWVzKSBpZiBodHRwX29wdGlvbl92YWx1ZXMgZWxzZSBOb25lCisgICAgICAgICAgICApCiAgICAgICAgICAgICBnZW5lcmF0aW9uX2NvbmZpZyA9IHR5cGVzLkdlbmVyYXRlQ29udGVudENvbmZpZygKICAgICAgICAgICAgICAgICB0ZW1wZXJhdHVyZT0wLjUsCiAgICAgICAgICAgICAgICAgdG9wX3A9MSwKQEAgLTQ5OSwxMSArNTA4LDE3IEBAIGRlZiBfZ2VuZXJhdGVfcmVzcG9uc2UoCiAgICAgICAgICAgICAgICAgICAgIGYie2xsbV9wcm92aWRlcn06IG1vZGVsX25hbWUgaXMgbm90IHNldCwgcGxlYXNlIHNldCBpdCBpbiB0aGUgY29uZmlnLnRvbWwgZmlsZS4iCiAgICAgICAgICAgICAgICAgKQogCisgICAgICAgICAgICB0cmFuc3BvcnRfb3B0aW9ucyA9IHt9CisgICAgICAgICAgICBpZiByZXF1ZXN0X3RpbWVvdXQgaXMgbm90IE5vbmU6CisgICAgICAgICAgICAgICAgdHJhbnNwb3J0X29wdGlvbnNbInRpbWVvdXQiXSA9IHJlcXVlc3RfdGltZW91dAorICAgICAgICAgICAgaWYgbWF4X3JldHJpZXMgaXMgbm90IE5vbmU6CisgICAgICAgICAgICAgICAgdHJhbnNwb3J0X29wdGlvbnNbIm51bV9yZXRyaWVzIl0gPSBtYXhfcmV0cmllcwogICAgICAgICAgICAgcmVzcG9uc2UgPSB0cmFjZV9zZGtfY2FsbCgKICAgICAgICAgICAgICAgICBsbG1fcHJvdmlkZXIsIGJhc2VfdXJsLCBsaXRlbGxtLmNvbXBsZXRpb24sCiAgICAgICAgICAgICAgICAgbW9kZWw9bW9kZWxfbmFtZSwKICAgICAgICAgICAgICAgICBtZXNzYWdlcz1beyJyb2xlIjogInVzZXIiLCAiY29udGVudCI6IHByb21wdH1dLAogICAgICAgICAgICAgICAgIGRyb3BfcGFyYW1zPVRydWUsCisgICAgICAgICAgICAgICAgKip0cmFuc3BvcnRfb3B0aW9ucywKICAgICAgICAgICAgICkKIAogICAgICAgICAgICAgaWYgbm90IHJlc3BvbnNlOgpkaWZmIC0tZ2l0IGEvdGVzdC9zZXJ2aWNlcy90ZXN0X2xsbS5weSBiL3Rlc3Qvc2VydmljZXMvdGVzdF9sbG0ucHkKaW5kZXggNTk4NzAxMmNiMzk1M2JiYzY0YTBmM2M0ODlhMzg2MjJhZDM1ZjM5Yy4uMDczODNkNTYzNWYxYTYyYjU1NTJiZjczNmM0NjY5YTZiNjIyNTZmMCAxMDA2NDQKLS0tIGEvdGVzdC9zZXJ2aWNlcy90ZXN0X2xsbS5weQorKysgYi90ZXN0L3NlcnZpY2VzL3Rlc3RfbGxtLnB5CkBAIC01MDksNiArNTA5LDU3IEBAIGNsYXNzIFRlc3RHZW5lcmF0ZVJlc3BvbnNlVHJhbnNwb3J0TGltaXRzKHVuaXR0ZXN0LlRlc3RDYXNlKToKICAgICAgICAgICAgIGJhc2VfdXJsPSJodHRwczovL2V4YW1wbGUudGVzdC92MSIsCiAgICAgICAgICkKIAorICAgIGRlZiB0ZXN0X3RyYW5zcG9ydF9saW1pdHNfZm9yd2FyZGVkX3RvX2dlbWluaV9hbmRfbGl0ZWxsbShzZWxmKToKKyAgICAgICAgIiIi6L+e5o6l5rWL6K+V55qE6LaF5pe2L+mHjeivlee6puadn+S5n+W/hemhu+S9nOeUqOWIsCBHZW1pbmkg5ZKMIExpdGVMTE0g6YCC6YWN5Zmo44CCIiIiCisgICAgICAgIGNvbmZpZy5hcHAudXBkYXRlKAorICAgICAgICAgICAgeworICAgICAgICAgICAgICAgICJsbG1fcHJvdmlkZXIiOiAiZ2VtaW5pIiwKKyAgICAgICAgICAgICAgICAiZ2VtaW5pX2FwaV9rZXkiOiAiZ2VtaW5pLXRlc3Qta2V5IiwKKyAgICAgICAgICAgICAgICAiZ2VtaW5pX2Jhc2VfdXJsIjogIiIsCisgICAgICAgICAgICAgICAgImdlbWluaV9tb2RlbF9uYW1lIjogImdlbWluaS10ZXN0LW1vZGVsIiwKKyAgICAgICAgICAgIH0KKyAgICAgICAgKQorICAgICAgICBjYXB0dXJlZCA9IHt9CisKKyAgICAgICAgY2xhc3MgRmFrZUdlbWluaUNsaWVudDoKKyAgICAgICAgICAgIGRlZiBfX2luaXRfXyhzZWxmLCAqKmt3YXJncyk6CisgICAgICAgICAgICAgICAgY2FwdHVyZWRbImdlbWluaSJdID0ga3dhcmdzCisgICAgICAgICAgICAgICAgc2VsZi5tb2RlbHMgPSB0eXBlcy5TaW1wbGVOYW1lc3BhY2UoCisgICAgICAgICAgICAgICAgICAgIGdlbmVyYXRlX2NvbnRlbnQ9bGFtYmRhICoqa3c6IHR5cGVzLlNpbXBsZU5hbWVzcGFjZSh0ZXh0PSJvayIpCisgICAgICAgICAgICAgICAgKQorCisgICAgICAgICAgICBkZWYgX19lbnRlcl9fKHNlbGYpOgorICAgICAgICAgICAgICAgIHJldHVybiBzZWxmCisKKyAgICAgICAgICAgIGRlZiBfX2V4aXRfXyhzZWxmLCBleGNfdHlwZSwgZXhjX3ZhbHVlLCB0cmFjZWJhY2spOgorICAgICAgICAgICAgICAgIHJldHVybiBOb25lCisKKyAgICAgICAgd2l0aCBwYXRjaCgiZ29vZ2xlLmdlbmFpLkNsaWVudCIsIEZha2VHZW1pbmlDbGllbnQpOgorICAgICAgICAgICAgcmVzdWx0ID0gbGxtLl9nZW5lcmF0ZV9yZXNwb25zZSgiaGkiLCByZXF1ZXN0X3RpbWVvdXQ9MzAsIG1heF9yZXRyaWVzPTApCisKKyAgICAgICAgc2VsZi5hc3NlcnRFcXVhbChyZXN1bHQsICJvayIsIHJlc3VsdCkKKyAgICAgICAgc2VsZi5hc3NlcnRFcXVhbChjYXB0dXJlZFsiZ2VtaW5pIl1bImh0dHBfb3B0aW9ucyJdLnRpbWVvdXQsIDMwMDAwKQorICAgICAgICBzZWxmLmFzc2VydElzTm9uZShjYXB0dXJlZFsiZ2VtaW5pIl1bImh0dHBfb3B0aW9ucyJdLmJhc2VfdXJsKQorCisgICAgICAgIGNvbmZpZy5hcHBbImxsbV9wcm92aWRlciJdID0gImxpdGVsbG0iCisgICAgICAgIGNvbmZpZy5hcHBbImxpdGVsbG1fbW9kZWxfbmFtZSJdID0gIm9wZW5haS9ncHQtNG8tbWluaSIKKworICAgICAgICBkZWYgY29tcGxldGlvbigqKmt3YXJncyk6CisgICAgICAgICAgICBjYXB0dXJlZFsibGl0ZWxsbSJdID0ga3dhcmdzCisgICAgICAgICAgICByZXR1cm4gdHlwZXMuU2ltcGxlTmFtZXNwYWNlKAorICAgICAgICAgICAgICAgIGNob2ljZXM9WworICAgICAgICAgICAgICAgICAgICB0eXBlcy5TaW1wbGVOYW1lc3BhY2UobWVzc2FnZT10eXBlcy5TaW1wbGVOYW1lc3BhY2UoY29udGVudD0ib2siKSkKKyAgICAgICAgICAgICAgICBdCisgICAgICAgICAgICApCisKKyAgICAgICAgZmFrZV9saXRlbGxtID0gdHlwZXMuU2ltcGxlTmFtZXNwYWNlKGNvbXBsZXRpb249Y29tcGxldGlvbikKKyAgICAgICAgd2l0aCBwYXRjaC5kaWN0KHN5cy5tb2R1bGVzLCB7ImxpdGVsbG0iOiBmYWtlX2xpdGVsbG19KToKKyAgICAgICAgICAgIHJlc3VsdCA9IGxsbS5fZ2VuZXJhdGVfcmVzcG9uc2UoImhpIiwgcmVxdWVzdF90aW1lb3V0PTMwLCBtYXhfcmV0cmllcz0wKQorCisgICAgICAgIHNlbGYuYXNzZXJ0RXF1YWwocmVzdWx0LCAib2siLCByZXN1bHQpCisgICAgICAgIHNlbGYuYXNzZXJ0RXF1YWwoY2FwdHVyZWRbImxpdGVsbG0iXVsidGltZW91dCJdLCAzMCkKKyAgICAgICAgc2VsZi5hc3NlcnRFcXVhbChjYXB0dXJlZFsibGl0ZWxsbSJdWyJudW1fcmV0cmllcyJdLCAwKQorCiAKIGNsYXNzIFRlc3RMaXRlTExNUHJvdmlkZXIodW5pdHRlc3QuVGVzdENhc2UpOgogICAgIGRlZiBzZXRVcChzZWxmKToK'}}\n\
+        p=payload[os.environ['LANE']]\nsubprocess.run(['git','fetch','--depth=1','https://github.com/harry0703/MoneyPrinterTurbo.git',p['ref']],check=True)\n\
+        subprocess.run(['git','config','core.autocrlf','false'],check=True)\nsubprocess.run(['git','config','core.eol','lf'],check=True)\n\
+        subprocess.run(['git','checkout','--force','--detach','FETCH_HEAD'],check=True)\nsubprocess.run(['git','checkout-index','--all','--force'],check=True)\n\
+        expected={}\nfor f in subprocess.check_output(['git','ls-files','-z']).decode().split('\\0'):\n if f and pathlib.Path(f).is_file():expected[f]=hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest()\n\
+        if p['patch']:\n pathlib.Path(os.environ['RUNNER_TEMP'],'candidate.patch').write_bytes(base64.b64decode(p['patch']))\n\
+        \ subprocess.run(['git','apply',str(pathlib.Path(os.environ['RUNNER_TEMP'],'candidate.patch'))],check=True)\nfor f,v\
+        \ in p.get('write',{}).items():pathlib.Path(f).write_bytes(base64.b64decode(v))\nexpected.update(p['files'])\ndiagnostics={}\n\
+        for f in ['app/services/llm.py','test/services/test_llm.py','test/services/test_material_cache.py','uv.lock']:\n b=pathlib.Path(f).read_bytes();diagnostics[f]={'sha256':hashlib.sha256(b).hexdigest(),'CRLF':b.count(bytes([13,10])),'LF':b.count(bytes([10]))}\n\
+        pathlib.Path(os.environ['RUNNER_TEMP'],'materialization.json').write_text(json.dumps({'files':diagnostics,'core_eol':subprocess.check_output(['git','config','core.eol']).decode().strip(),'autocrlf':subprocess.check_output(['git','config','core.autocrlf']).decode().strip()}))\n\
+        for f,v in p['files'].items():assert hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest()==v,f\npathlib.Path(os.environ['RUNNER_TEMP'],'expected-source.json').write_text(json.dumps(expected))\n"
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+    - name: Frozen dependency sync
+      shell: bash
+      run: 'set -o pipefail
+
+        uv sync --frozen --python 3.11 2>&1 | tee "$RUNNER_TEMP/install.log"'
+    - name: Bounded native qualification
+      shell: python
+      run: "import subprocess,os,pathlib,json,xml.etree.ElementTree as E,hashlib\nlane=os.environ['LANE'];out=pathlib.Path(os.environ['RUNNER_TEMP']);results={}\n\
+        def run(name,args):\n p=subprocess.run(args,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,encoding='utf8',errors='replace');(out/(name+'.log')).write_text(p.stdout,encoding='utf8');print(name,p.returncode,p.stdout[-2500:]);results[name]=p.returncode;return\
+        \ p.returncode\nprefix=['uv','run','--no-sync','python','-X','utf8','-m','pytest','-q']\nif lane.startswith('auth'):\n\
+        \ tests=['test/services/test_api_authentication.py'] if lane=='auth-before' else ['test/services/test_api_authentication.py','test/services/test_controller_base.py','test/services/test_artifact_download_mime.py','test/services/test_artifact_http_head.py']\n\
+        elif lane=='llm-after':tests=['test/services/test_llm.py','test/services/test_controller_llm.py','test/services/test_request_logging.py']\n\
+        else:tests=['test/services/test_material_cache.py::TestMaterialSearchCache::test_corrupted_cache_is_removed_without_breaking_search']\n\
+        rc=run('tests',prefix+tests+['--junitxml='+str(out/'tests.xml')])\nif lane=='auth-before':\n root=E.parse(out/'tests.xml').getroot();failed=[c\
+        \ for c in root.iter('testcase') if c.find('failure') is not None];assert rc==1 and len(failed)==1 and failed[0].attrib['name'].startswith('test_latin1_and_utf8_encodings_preserve_existing_key_access'),[(c.attrib)\
+        \ for c in failed]\nelif not lane.startswith('windows'):assert rc==0,'candidate tests failed'\nif lane=='windows-llm':\n\
+        \ rc2=run('transport',prefix+['test/services/test_llm.py','-k','transport_limits_forwarded_to_gemini_and_litellm','--junitxml='+str(out/'transport.xml')]);assert\
+        \ rc2==0\nif lane in ['auth-after','llm-after']:\n paths=['app/controllers/base.py','test/services/test_api_authentication.py']\
+        \ if lane=='auth-after' else ['app/services/llm.py','test/services/test_llm.py']\n assert run('lint',['uv','run','--no-sync','ruff','check']+paths)==0\n\
+        \ assert run('compile',['uv','run','--no-sync','python','-m','py_compile']+paths)==0\nexpected=json.loads((out/'expected-source.json').read_text());bad=[f\
+        \ for f,h in expected.items() if not pathlib.Path(f).is_file() or hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest()!=h]\n\
+        (out/'source-guard.json').write_text(json.dumps({'all_tracked_exact':not bad,'mismatched':bad}));assert not bad,bad\n\
+        (out/'results.json').write_text(json.dumps({'lane':lane,'commands':results,'scope':'Windows cache classification is\
+        \ observation, never relabeled green when pytest fails'}))\nif lane.startswith('windows') and rc:raise SystemExit(rc)\n"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: mpt-${{ matrix.lane }}
+        path: '${{ runner.temp }}/*.log
+
+          ${{ runner.temp }}/*.json
+
+          ${{ runner.temp }}/*.xml
+
+          ${{ runner.temp }}/candidate.patch'
