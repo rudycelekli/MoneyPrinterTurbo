@@ -1,0 +1,90 @@
+name: Private MPT contain framing integration
+'on':
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+        - '3.11'
+        - '3.13'
+        lane:
+        - baseline
+        - candidate
+    env:
+      LANE: ${{ matrix.lane }}
+      PYTHONUTF8: '1'
+      PY_MINOR: ${{ matrix.python == '3.11' && '11' || '13' }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    - name: Exact frozen source and candidate materialization
+      shell: python
+      run: "import os,json,pathlib,base64,subprocess,hashlib\nimport zlib\np=json.loads(zlib.decompress(base64.b64decode('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')))\n\
+        subprocess.run(['git','fetch','--depth=1','https://github.com/harry0703/MoneyPrinterTurbo.git',p['main']],check=True)\n\
+        subprocess.run(['git','config','core.autocrlf','false'],check=True)\nsubprocess.run(['git','checkout','--force','--detach','FETCH_HEAD'],check=True)\n\
+        expected={f:hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest() for f\
+        \ in subprocess.check_output(['git','ls-files','-z']).decode().split('\\0')\
+        \ if f and pathlib.Path(f).is_file()}\nif os.environ['LANE']=='candidate':\n\
+        \ path=pathlib.Path(os.environ['RUNNER_TEMP'],'candidate.patch');path.write_bytes(base64.b64decode(p['patch']));subprocess.run(['git','apply',str(path)],check=True);expected.update(p['files'])\n\
+        else:\n for f,value in p['test_writes'].items():pathlib.Path(f).write_bytes(base64.b64decode(value));expected[f]=hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest()\n\
+        pathlib.Path(os.environ['RUNNER_TEMP'],'expected-source.json').write_text(json.dumps(expected))\n"
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python }}
+    - uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: false
+    - name: Frozen dependency sync
+      shell: bash
+      run: 'set -o pipefail
+
+        uv sync --frozen --python "${{ matrix.python }}" 2>&1 | tee "$RUNNER_TEMP/install.log"'
+    - name: Install native tools required by existing upstream CI
+      shell: bash
+      run: 'set -o pipefail
+
+        sudo apt-get update 2>&1 | tee "$RUNNER_TEMP/apt-update.log"
+
+        sudo apt-get install -y ffmpeg 2>&1 | tee "$RUNNER_TEMP/apt-ffmpeg.log"'
+    - name: Native contain display geometry cache and current project controls
+      shell: python
+      run: "import os,subprocess,pathlib,json,hashlib,xml.etree.ElementTree as E\n\
+        out=pathlib.Path(os.environ['RUNNER_TEMP']);lane=os.environ['LANE'];results={}\n\
+        def run(name,args):\n r=subprocess.run(args,capture_output=True,text=True);(out/(name+'.log')).write_text(r.stdout+r.stderr);print(name,r.returncode,r.stdout[-1800:]);results[name]=r.returncode;return\
+        \ r.returncode\nassert run('interpreter',['.venv/bin/python','-c','import\
+        \ sys,json; print(json.dumps({\"executable\":sys.executable,\"version\":sys.version,\"\
+        version_info\":list(sys.version_info)}))'])==0\nassert json.loads((out/'interpreter.log').read_text())['version_info'][:2]==[3,int(os.environ['PY_MINOR'])]\n\
+        prefix=['.venv/bin/python','-m','pytest','-q']\nassert run('ffmpeg-version',['ffmpeg','-version'])==0\n\
+        assert run('ffprobe-version',['ffprobe','-version'])==0\nregressions=['test/services/test_video_project_fit_mode.py']\n\
+        tests=['test/services/test_video_project.py','test/services/test_minimax_output_container.py']+regressions\n\
+        rc=run('tests',prefix+tests+['--junitxml='+str(out/'tests.xml')])\nroot=E.parse(out/'tests.xml').getroot();cases=list(root.iter('testcase'));failed=[x\
+        \ for x in cases if x.find('failure') is not None];errors=[x for x in cases\
+        \ if x.find('error') is not None]\nif lane=='baseline': assert rc==1 and len(failed)==10\
+        \ and all('test_video_project_fit_mode' in c.attrib.get('classname','') for\
+        \ c in failed) and not errors,[(x.attrib) for x in failed+errors]\nelse:\n\
+        \ assert rc==0,'candidate project tests failed'\n assert all(c.find('skipped')\
+        \ is None for c in cases), 'Native project coverage must not skip'\n paths=['app/services/video_project.py']+regressions\n\
+        \ assert run('ruff-version',['.venv/bin/ruff','--version'])==0\n assert (out/'ruff-version.log').read_text().strip()=='ruff\
+        \ 0.15.21'\n assert run('lint',['.venv/bin/ruff','check']+paths)==0\n assert\
+        \ run('compile',['.venv/bin/python','-m','py_compile']+paths)==0\nexpected=json.loads((out/'expected-source.json').read_text());bad=[f\
+        \ for f,h in expected.items() if not pathlib.Path(f).is_file() or hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest()!=h]\n\
+        (out/'source-guard.json').write_text(json.dumps({'all_tracked_exact':not bad,'mismatched':bad}));assert\
+        \ not bad,bad\n(out/'results.json').write_text(json.dumps({'lane':lane,'commands':results,'cases':len(cases),'failures':len(failed),'errors':len(errors)}))\n"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: mpt-contain-${{ matrix.python }}-${{ matrix.lane }}
+        path: '${{ runner.temp }}/*.log
+
+          ${{ runner.temp }}/*.json
+
+          ${{ runner.temp }}/*.xml
+
+          ${{ runner.temp }}/candidate.patch'
